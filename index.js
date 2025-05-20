@@ -24,6 +24,22 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    const roommateCollection = client.db('ph-a10-DB').collection('roommate')
+
+    app.post('/add-roommate', async(req, res)=>{
+        const newRoommate= req.body;
+         const result = await roommateCollection.insertOne(newRoommate)
+        res.send(result)
+    })
+
+    app.get('/add-roommate', async(req, res)=>{
+        const result = await roommateCollection.find().toArray()
+        res.send(result)
+    })
+
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
