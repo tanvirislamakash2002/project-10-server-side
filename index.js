@@ -38,6 +38,26 @@ async function run() {
         res.send(result)
     })
 
+    app.get('/add-roommate/:id', async(req, res)=>{
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)}
+        const result = await roommateCollection.findOne(query)
+        res.send(result)
+    })
+
+    app.put('/add-roommate/:id', async(req, res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const options = {upsert:true}
+      const updatedData = req.body;
+      const updatedDoc = {
+        $set:updatedData
+      }
+      const result = await roommateCollection.updateOne(filter, updatedDoc, options)
+
+      res.send(result)
+    })
+
     app.delete('/add-roommate/:id', async(req, res)=>{
         const id  = req.params.id;
         const query = {_id: new ObjectId(id)}
