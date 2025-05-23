@@ -38,6 +38,11 @@ async function run() {
         res.send(result)
     })
 
+    app.get('/home', async(req, res)=>{
+      const result = await roommateCollection.find({availability:'yes'}).limit(4).toArray()
+      res.send(result)
+    })
+
     app.get('/add-roommate/:id', async(req, res)=>{
         const id = req.params.id;
         const query = {_id: new ObjectId(id)}
@@ -74,6 +79,7 @@ async function run() {
     // await client.close();
   }
 }
+
 run().catch(console.dir);
 
 app.get('/', (req, res) => {
