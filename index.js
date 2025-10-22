@@ -25,51 +25,56 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
-    const roommateCollection = client.db('ph-a10-DB').collection('roommate')
+    const db = client.db('ph-a10-DB')
+    const listingCollection = db.collection('listings')
 
-    app.post('/add-roommate', async(req, res)=>{
-        const newRoommate= req.body;
-         const result = await roommateCollection.insertOne(newRoommate)
-        res.send(result)
-    })
-
-    app.get('/add-roommate', async(req, res)=>{
-        const result = await roommateCollection.find().toArray()
-        res.send(result)
-    })
-
-    app.get('/home', async(req, res)=>{
-      const result = await roommateCollection.find({availability:'yes'}).limit(6).toArray()
+    app.post('/add-roommate', async (req, res) => {
+      const newRoommate = req.body;
+      const result = await listingCollection.insertOne(newRoommate)
       res.send(result)
     })
 
-    app.get('/add-roommate/:id', async(req, res)=>{
-        const id = req.params.id;
-        const query = {_id: new ObjectId(id)}
-        const result = await roommateCollection.findOne(query)
-        res.send(result)
+    app.get('/add-roommate', async (req, res) => {
+      const result = await listingCollection.find().toArray()
+      res.send(result)
     })
 
-    app.put('/add-roommate/:id', async(req, res)=>{
+    app.get('/home', async (req, res) => {
+      const result = await listingCollection.find({ availability: 'yes' }).limit(6).toArray()
+      res.send(result)
+    })
+
+    app.get('/add-roommate/:id', async (req, res) => {
       const id = req.params.id;
-      const filter = {_id: new ObjectId(id)}
-      const options = {upsert:true}
+      const query = { _id: new ObjectId(id) }
+      const result = await listingCollection.findOne(query)
+      res.send(result)
+    })
+
+    app.put('/add-roommate/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true }
       const updatedData = req.body;
       const updatedDoc = {
-        $set:updatedData
+        $set: updatedData
       }
-      const result = await roommateCollection.updateOne(filter, updatedDoc, options)
+      const result = await listingCollection.updateOne(filter, updatedDoc, options)
 
       res.send(result)
     })
 
-    app.delete('/add-roommate/:id', async(req, res)=>{
-        const id  = req.params.id;
-        const query = {_id: new ObjectId(id)}
-        const result = await roommateCollection.deleteOne(query);
-        res.send(result)
+    app.delete('/add-roommate/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await listingCollection.deleteOne(query);
+      res.send(result)
     })
 
+
+    // image upload route
+    const utilityRoutes = require('./routes/imageRoutes');
+    app.use('/', utilityRoutes);
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
