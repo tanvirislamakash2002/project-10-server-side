@@ -28,6 +28,12 @@ async function run() {
     const db = client.db('ph-a10-DB')
     const listingCollection = db.collection('listings')
 
+
+    //auth routes
+    const authRoutes = require('./routes/authRoutes');
+    app.use('/', authRoutes);
+
+    //----
     app.post('/add-roommate', async (req, res) => {
       const newRoommate = req.body;
       const result = await listingCollection.insertOne(newRoommate)
