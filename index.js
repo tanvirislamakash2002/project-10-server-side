@@ -33,6 +33,9 @@ async function run() {
     const authRoutes = require('./routes/authRoutes');
     app.use('/', authRoutes);
 
+    // users routes
+    const userRoutes = require('./routes/userRoutes');
+    app.use('/', userRoutes);
     //----
     app.post('/add-roommate', async (req, res) => {
       const newRoommate = req.body;
