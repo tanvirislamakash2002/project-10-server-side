@@ -1,20 +1,20 @@
 const { ObjectId } = require('mongodb');
 const { client } = require('../config/db');
-const db = client.db('ph-a12-db');
+const db = client.db('ph-a10-DB');
 
 // Toggle
 const toggleFavorite = async (req, res) => {
   try {
-    const { userEmail, donationId } = req.body;
+    const { userEmail, listingId } = req.body;
 
     // Validate ObjectId
-    if (!ObjectId.isValid(donationId)) {
+    if (!ObjectId.isValid(listingId)) {
       return res.status(400).json({ message: 'Invalid donation ID' });
     }
 
-    const _donationId = new ObjectId(donationId);
+    const _listingId = new ObjectId(listingId);
 
-    const existing = await db.collection('favorites').findOne({ userEmail, donationId: _donationId });
+    const existing = await db.collection('favorites').findOne({ userEmail, listingId: _listingId });
 
     if (existing) {
       await db.collection('favorites').deleteOne({ _id: existing._id });
@@ -22,7 +22,7 @@ const toggleFavorite = async (req, res) => {
     } else {
       const newFavorite = {
         userEmail,
-        donationId: _donationId,
+        listingId: _listingId,
         createdAt: new Date(),
       };
       await db.collection('favorites').insertOne(newFavorite);
@@ -38,10 +38,10 @@ const toggleFavorite = async (req, res) => {
 // Check
 const checkFavorite = async (req, res) => {
   try {
-    const { userEmail, donationId } = req.query;
+    const { userEmail, listingId } = req.query;
     const favorite = await db.collection('favorites').findOne({ 
       userEmail, 
-      donationId: new ObjectId(donationId) 
+      listingId: new ObjectId(listingId) 
     });
     res.json({ isFavorite: !!favorite });
   } catch (err) {
@@ -49,7 +49,7 @@ const checkFavorite = async (req, res) => {
   }
 };
 
-// Get all favorites with donation data
+// Get all favorites with listings data
 const getFavorites = async (req, res) => {
   try {
     const { userEmail } = req.query;
@@ -59,13 +59,13 @@ const getFavorites = async (req, res) => {
       { $match: { userEmail } },
       {
         $lookup: {
-          from: 'donations',
-          localField: 'donationId',
+          from: 'listings',
+          localField: 'listingId',
           foreignField: '_id',
-          as: 'donation'
+          as: 'listing'
         }
       },
-      { $unwind: '$donation' },
+      { $unwind: '$listing' },
     { $sort: { _id: -1 } },
     ]).toArray();
     res.json(favorites);
@@ -85,9 +85,32 @@ const deleteFavorite = async (req, res) => {
   }
 };
 
+// Remove favorite in a bulk
+const bulkRemoveFavorites = async (req, res) => {
+  try {
+    const { favoriteIds } = req.body;
+    
+    if (!favoriteIds || !Array.isArray(favoriteIds)) {
+      return res.status(400).json({ message: 'Invalid favorite IDs' });
+    }
+
+    const result = await db.collection('favorites').deleteMany({
+      _id: { $in: favoriteIds.map(id => new ObjectId(id)) }
+    });
+
+    res.json({ 
+      message: `Removed ${result.deletedCount} favorites`,
+      deletedCount: result.deletedCount 
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   toggleFavorite,
   checkFavorite,
   getFavorites,
   deleteFavorite,
+  bulkRemoveFavorites
 };

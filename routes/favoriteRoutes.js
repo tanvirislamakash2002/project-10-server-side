@@ -8,19 +8,21 @@ const {
   deleteFavorite,
 } = require('../controllers/favoriteController');
 
-// Import middlewares
-const verifyJWT = require('../middlewares/verifyJWT');
+
 
 // Toggle
-router.post('/favorites/toggle',verifyJWT, toggleFavorite);
+router.post('/favorites/toggle', toggleFavorite);
 
 // Check
-router.get('/favorites/check',verifyJWT, checkFavorite);
+router.get('/favorites/check', checkFavorite);
 
 // Get all favorites
-router.get('/favorites', verifyJWT, getFavorites);
+router.get('/favorites', getFavorites);
 
 // Delete one favorite by ID
-router.delete('/favorites/:id', verifyJWT, deleteFavorite);
+router.delete('/favorites/:id', deleteFavorite);
+
+// Delete favorite in a bulk
+router.delete('/favorites/bulk', bulkRemoveFavorites);
 
 module.exports = router;

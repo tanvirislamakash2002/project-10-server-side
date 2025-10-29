@@ -80,6 +80,9 @@ async function run() {
       res.send(result)
     })
 
+    // save to favorite routes
+    const favoriteRoutes = require('./routes/favoriteRoutes');
+    app.use('/', favoriteRoutes);
 
     // image upload route
     const utilityRoutes = require('./routes/imageRoutes');
