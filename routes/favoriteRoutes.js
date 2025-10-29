@@ -6,6 +6,7 @@ const {
   checkFavorite,
   getFavorites,
   deleteFavorite,
+  bulkRemoveFavorites
 } = require('../controllers/favoriteController');
 
 
@@ -19,10 +20,11 @@ router.get('/favorites/check', checkFavorite);
 // Get all favorites
 router.get('/favorites', getFavorites);
 
+// Delete favorite in a bulk
+router.delete('/favorites/bulk', bulkRemoveFavorites);
+
 // Delete one favorite by ID
 router.delete('/favorites/:id', deleteFavorite);
 
-// Delete favorite in a bulk
-router.delete('/favorites/bulk', bulkRemoveFavorites);
 
 module.exports = router;

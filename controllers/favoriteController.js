@@ -87,9 +87,9 @@ const deleteFavorite = async (req, res) => {
 
 // Remove favorite in a bulk
 const bulkRemoveFavorites = async (req, res) => {
+
   try {
     const { favoriteIds } = req.body;
-    
     if (!favoriteIds || !Array.isArray(favoriteIds)) {
       return res.status(400).json({ message: 'Invalid favorite IDs' });
     }
