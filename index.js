@@ -36,6 +36,10 @@ async function run() {
     // users routes
     const userRoutes = require('./routes/userRoutes');
     app.use('/', userRoutes);
+
+    // blog routes
+    const userRoutes = require('./routes/blogRoutes');
+    app.use('/', userRoutes);
     //----
     app.post('/add-roommate', async (req, res) => {
       const newRoommate = req.body;
