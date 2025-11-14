@@ -219,7 +219,7 @@ const createBlogPost = async (req, res) => {
       content,
       category,
       tags,
-      image,
+      coverImage,
       author,
       readTime
     } = req.body;
@@ -241,7 +241,7 @@ const createBlogPost = async (req, res) => {
       content,
       category,
       tags: Array.isArray(tags) ? tags : [tags],
-      image,
+      coverImage,
       author: author || 'The Roommate Team',
       readTime: readTime || '5 min read',
       status: 'published', // or 'draft' for unpublished posts
