@@ -29,6 +29,10 @@ async function run() {
     const listingCollection = db.collection('listings')
 
 
+        // Role routes - ADD THIS LINE
+        app.set('db', db);
+    const roleRoutes = require('./ForDeveloper/roleRoutes');
+    app.use('/api/users', roleRoutes);
     //auth routes
     const authRoutes = require('./routes/authRoutes');
     app.use('/', authRoutes);
