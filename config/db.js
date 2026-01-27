@@ -1,11 +1,11 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = process.env.MONGODB_URI;
+import { MongoClient, ServerApiVersion } from 'mongodb';
+const uri = `mongodb://localhost:27017`;
 const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
 });
 const connectDB = async () => {
   try {
@@ -16,5 +16,5 @@ const connectDB = async () => {
     // process.exit(1);
   }
 };
-module.exports = connectDB;
-module.exports.client = client;
+
+export { client, connectDB };
