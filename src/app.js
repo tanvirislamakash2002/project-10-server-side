@@ -2,20 +2,8 @@ import express from "express"
 import cors from 'cors'
 import dotenv from "dotenv"
 import path from "path"
-import {
-    MongoClient,
-    ServerApiVersion,
-    ObjectId
-} from 'mongodb'
-import { userRoutes } from "./modules/auth/auth.route.js"
-
-// import roleRoutes from '../ForDeveloper/roleRoutes.js'
-// import authRoutes from '../routes/authRoutes.js'
-// import blogRoutes from '../routes/blogRoutes.js'
-// import favoriteRoutes from '../routes/favoriteRoutes.js'
-// import utilityRoutes from '../routes/imageRoutes.js'
-
 import  { connectDB, client } from '../config/db.js'
+import { userRouters } from "./modules/user/user.routes.js"
 
 dotenv.config({ path: path.join(process.cwd(), ".env") })
 const app = express()
@@ -24,12 +12,6 @@ app.use(cors())
 app.use(express.json())
 
 
-app.use('/test', userRoutes);
-
-
-
-// const uri = `mongodb://localhost:27017`;
-// const uri = process.env.MONGODB_URI;
 
 
 
@@ -50,7 +32,7 @@ async function run() {
         // app.use('/', authRoutes);
 
         // users routes
-        // app.use('/', userRoutes);
+        app.use('/', userRouters);
 
         // blog routes
         // app.use('/', blogRoutes);

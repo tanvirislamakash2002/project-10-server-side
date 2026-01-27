@@ -1,16 +1,17 @@
-const express = require('express');
+import express from "express"
+import { userController } from "./user.controller.js";
 const router = express.Router();
 
 // Import controllers
-const {
-    getUserByEmail,
-    getUserRole
-} = require('../controllers/userController');
+// const {
+//     getUserByEmail,
+//     getUserRole
+// } = require('../controllers/userController');
 
 // GET user by email 
-router.get('/users/:email', getUserByEmail);
+router.get('/users/:email', userController.getUserByEmail);
 
 // GET user role by email
-router.get('/users/:email/role', getUserRole);
+router.get('/users/:email/role', userController.getUserRole);
 
-module.exports = router;
+export const userRouters = router;

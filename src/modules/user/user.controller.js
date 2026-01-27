@@ -1,4 +1,5 @@
-const { client } = require("../config/db");
+import { client } from "../../../config/db.js";
+
 
 // GET user by email
 const getUserByEmail = async (req, res) => {
@@ -32,7 +33,7 @@ const getUserRole = async (req, res) => {
   }
 };
 
-module.exports = {
+export const userController = {
   getUserByEmail,
   getUserRole
 };
