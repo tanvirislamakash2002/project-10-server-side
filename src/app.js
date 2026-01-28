@@ -1,7 +1,5 @@
 import express from "express"
 import cors from 'cors'
-import dotenv from "dotenv"
-import path from "path"
 import  { connectDB, client } from '../config/db.js'
 import { userRoutes } from "./modules/user/user.routes.js"
 import { authRoutes } from "./modules/auth/auth.routes.js"
@@ -9,7 +7,6 @@ import { blogRoutes } from "./modules/blog/blog.routes.js"
 import { favoriteRoutes } from "./modules/favorite/favorite.routes.js"
 import { imageRoutes } from "./modules/image/image.routes.js"
 
-dotenv.config({ path: path.join(process.cwd(), ".env") })
 const app = express()
 
 app.use(cors())

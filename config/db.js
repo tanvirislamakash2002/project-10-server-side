@@ -1,5 +1,7 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
-const uri = `mongodb://localhost:27017`;
+import config from './index.js';
+const uri = config.mongodb_uri;
+
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -7,13 +9,12 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
 const connectDB = async () => {
   try {
-    // await client.connect();
     console.log('Connected to MongoDB!');
   } catch (err) {
     console.error(err);
-    // process.exit(1);
   }
 };
 

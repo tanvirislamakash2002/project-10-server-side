@@ -1,7 +1,6 @@
+import config from './config/index.js'
 import app from './src/app.js'
-const port = process.env.PORT || 3000
-
-
+const port = config.port
 
 app.listen(port, () => {
   console.log(`ph server is on the go ${port}`)

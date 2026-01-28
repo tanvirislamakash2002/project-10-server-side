@@ -4,12 +4,10 @@ import uploadImageToImgBB from "./image.controller.js";
 
 const router = express.Router();
 
-// const upload = multer(); 
-
 const upload = multer({
-  storage: multer.memoryStorage(), // This creates req.file.buffer
+  storage: multer.memoryStorage(), 
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
+    fileSize: 5 * 1024 * 1024, 
     files: 1
   }
 });

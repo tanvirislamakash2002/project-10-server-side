@@ -1,8 +1,8 @@
 import axios from "axios"
 import FormData from 'form-data';
+import config from "../../../config/index.js";
 
-const IMG_BB_API_KEY = "8071722e3d8140465d956914d39d6ec3";
-// const IMG_BB_API_KEY = process.env.IMGBB_API_KEY;
+const IMG_BB_API_KEY = config.imgbb_api_key;
 
 const uploadImageToImgBB = async (req, res) => {
     try {
