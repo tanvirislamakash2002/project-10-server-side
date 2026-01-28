@@ -7,6 +7,7 @@ import { blogRoutes } from "./modules/blog/blog.routes.js"
 import { favoriteRoutes } from "./modules/favorite/favorite.routes.js"
 import { imageRoutes } from "./modules/image/image.routes.js"
 import { listingsRoutes } from "./modules/listings/listings.routes.js"
+import { roleRoutes } from "./ForDeveloper/roleRoutes.js"
 
 const app = express()
 
@@ -18,12 +19,8 @@ async function run() {
 
         await connectDB();
 
-        const db = client.db('ph-a10-DB')
-        const listingCollection = db.collection('listings')
         // Role routes 
-        app.set('db', db);
-
-        // app.use('/api/users', roleRoutes);
+        app.use('/api/v1/users', roleRoutes);
 
         //auth routes
         app.use('/', authRoutes);
@@ -44,9 +41,8 @@ async function run() {
         app.use('/', imageRoutes);
 
 
-    } finally {
-        // Ensures that the client will close when you finish/error
-        // await client.close();
+    } catch(err) {
+        console.log(err);
     }
 }
 

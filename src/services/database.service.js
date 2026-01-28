@@ -1,32 +1,37 @@
 import { client } from "../../config/db.js";
 
 class DatabaseService {
-    constructor(){
+    constructor() {
         this.client = client;
         this.dbName = 'ph-a10-DB';
     }
 
     // get database instance
-    getDatabase(){
+    getDatabase() {
         return this.client.db(this.dbName)
     }
 
     // get collection by name
-    getCollection(collectionName){
+    getCollection(collectionName) {
         return this.getDatabase().collection(collectionName)
     }
 
     // specific collection getters
-    get listings(){
+    get listings() {
         return this.getCollection('listings')
     }
 
-    get blogPosts(){
+    get blogPosts() {
         return this.getCollection('blogPosts')
     }
 
-    get newsletterSubscriptions(){
+    get newsletterSubscriptions() {
         return this.getCollection('newsletterSubscriptions')
+    }
+
+    // for developer
+    get users() {
+        return this.getCollection('users')
     }
 }
 
