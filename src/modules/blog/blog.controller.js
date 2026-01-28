@@ -1,4 +1,5 @@
-const { client } = require('../config/db');
+import { client } from "../../../config/db.js";
+
 
 // Get all published blog posts with pagination and filtering
 const getAllBlogPosts = async (req, res) => {
@@ -321,7 +322,7 @@ const subscribeToNewsletter = async (req, res) => {
   }
 };
 
-module.exports = {
+export const blogController = {
   getAllBlogPosts,
   getBlogPostBySlug,
   getRelatedPosts,

@@ -1,4 +1,5 @@
-const { client } = require('../config/db');
+import { client } from "../../../config/db.js";
+
 
 const loginUser = async (req, res) => {
   try {
@@ -78,7 +79,7 @@ const checkUserEmail = async (req, res) => {
   }
 };
 
-module.exports = {
+export const authController = {
   registerUser,
   checkUserEmail,
   loginUser,

@@ -3,7 +3,9 @@ import cors from 'cors'
 import dotenv from "dotenv"
 import path from "path"
 import  { connectDB, client } from '../config/db.js'
-import { userRouters } from "./modules/user/user.routes.js"
+import { userRoutes } from "./modules/user/user.routes.js"
+import { authRoutes } from "./modules/auth/auth.routes.js"
+import { blogRoutes } from "./modules/blog/blog.routes.js"
 
 dotenv.config({ path: path.join(process.cwd(), ".env") })
 const app = express()
@@ -17,25 +19,31 @@ app.use(express.json())
 
 async function run() {
     try {
-        // Connect the client to the server	(optional starting in v4.7)
-        // await client.connect();
 
         await connectDB();
 
         const db = client.db('ph-a10-DB')
         const listingCollection = db.collection('listings')
-        // Role routes - ADD THIS LINE
+        // Role routes 
         app.set('db', db);
 
         // app.use('/api/users', roleRoutes);
+
         //auth routes
-        // app.use('/', authRoutes);
+        app.use('/', authRoutes);
 
         // users routes
-        app.use('/', userRouters);
+        app.use('/', userRoutes);
 
         // blog routes
-        // app.use('/', blogRoutes);
+        app.use('/', blogRoutes);
+
+        // save to favorite routes
+        // app.use('/', favoriteRoutes);
+
+        // image upload route
+        // app.use('/', utilityRoutes);
+        
         //----
         // app.post('/add-roommate', async (req, res) => {
         //     const newRoommate = req.body;
@@ -80,11 +88,6 @@ async function run() {
         //     res.send(result)
         // })
 
-        // save to favorite routes
-        // app.use('/', favoriteRoutes);
-
-        // image upload route
-        // app.use('/', utilityRoutes);
 
         // Send a ping to confirm a successful connection
         // await client.db("admin").command({ ping: 1 });
