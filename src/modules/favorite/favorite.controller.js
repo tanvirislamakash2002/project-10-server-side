@@ -1,5 +1,6 @@
-const { ObjectId } = require('mongodb');
-const { client } = require('../config/db');
+import { ObjectId } from "mongodb";
+import { client } from "../../../config/db.js";
+
 const db = client.db('ph-a10-DB');
 
 // Toggle
@@ -107,7 +108,7 @@ const bulkRemoveFavorites = async (req, res) => {
   }
 };
 
-module.exports = {
+export const favoriteController = {
   toggleFavorite,
   checkFavorite,
   getFavorites,

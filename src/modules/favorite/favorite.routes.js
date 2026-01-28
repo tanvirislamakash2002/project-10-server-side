@@ -1,30 +1,21 @@
-const express = require('express');
+import express from "express"
+import { favoriteController } from "./favorite.controller.js";
 const router = express.Router();
 
-const {
-  toggleFavorite,
-  checkFavorite,
-  getFavorites,
-  deleteFavorite,
-  bulkRemoveFavorites
-} = require('../controllers/favoriteController');
-
-
-
 // Toggle
-router.post('/favorites/toggle', toggleFavorite);
+router.post('/favorites/toggle', favoriteController.toggleFavorite);
 
 // Check
-router.get('/favorites/check', checkFavorite);
+router.get('/favorites/check', favoriteController.checkFavorite);
 
 // Get all favorites
-router.get('/favorites', getFavorites);
+router.get('/favorites', favoriteController.getFavorites);
 
 // Delete favorite in a bulk
-router.delete('/favorites/bulk', bulkRemoveFavorites);
+router.delete('/favorites/bulk', favoriteController.bulkRemoveFavorites);
 
 // Delete one favorite by ID
-router.delete('/favorites/:id', deleteFavorite);
+router.delete('/favorites/:id', favoriteController.deleteFavorite);
 
 
-module.exports = router;
+export const favoriteRoutes = router;
