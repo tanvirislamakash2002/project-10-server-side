@@ -1,0 +1,33 @@
+import { client } from "../../config/db.js";
+
+class DatabaseService {
+    constructor(){
+        this.client = client;
+        this.dbName = 'ph-a10-DB';
+    }
+
+    // get database instance
+    getDatabase(){
+        return this.client.db(this.dbName)
+    }
+
+    // get collection by name
+    getCollection(collectionName){
+        return this.getDatabase().collection(collectionName)
+    }
+
+    // specific collection getters
+    get listings(){
+        return this.getCollection('listings')
+    }
+
+    get blogPosts(){
+        return this.getCollection('blogPosts')
+    }
+
+    get newsletterSubscriptions(){
+        return this.getCollection('newsletterSubscriptions')
+    }
+}
+
+export const dbService = new DatabaseService();

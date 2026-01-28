@@ -1,28 +1,27 @@
-import { client } from "../../../config/db.js";
+import { dbService } from "../../services/database.service.js";
 
 
 // Get all published blog posts with pagination and filtering
 const getAllBlogPosts = async (req, res) => {
   try {
-    const { 
-      page = 1, 
-      limit = 10, 
-      category, 
-      search, 
-      tag 
+    const {
+      page = 1,
+      limit = 10,
+      category,
+      search,
+      tag
     } = req.query;
-    
-    const db = client.db('ph-a10-DB');
-    const blogCollection = db.collection('blogPosts');
-    
+
+    const blogCollection = dbService.blogPosts;
+
     // Build filter for published posts only
     const filter = { status: 'published' };
-    
+
     // Add category filter if provided
     if (category && category !== 'all') {
       filter.category = category;
     }
-    
+
     // Add search filter if provided
     if (search) {
       filter.$or = [
@@ -31,14 +30,14 @@ const getAllBlogPosts = async (req, res) => {
         { content: { $regex: search, $options: 'i' } }
       ];
     }
-    
+
     // Add tag filter if provided
     if (tag) {
       filter.tags = { $in: [tag] };
     }
-    
+
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
+
     // Get posts with pagination
     const posts = await blogCollection
       .find(filter)
@@ -46,11 +45,11 @@ const getAllBlogPosts = async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit))
       .toArray();
-    
+
     // Get total count for pagination
     const totalPosts = await blogCollection.countDocuments(filter);
     const totalPages = Math.ceil(totalPosts / parseInt(limit));
-    
+
     res.json({
       success: true,
       posts,
@@ -62,12 +61,12 @@ const getAllBlogPosts = async (req, res) => {
         hasPrev: parseInt(page) > 1
       }
     });
-    
+
   } catch (err) {
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error fetching blog posts',
-      error: err.message 
+      error: err.message
     });
   }
 };
@@ -76,38 +75,38 @@ const getAllBlogPosts = async (req, res) => {
 const getBlogPostBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    
-    const db = client.db('ph-a10-DB');
-    const blogCollection = db.collection('blogPosts');
-    
-    const post = await blogCollection.findOne({ 
-      slug, 
-      status: 'published' 
+
+    const blogCollection = dbService.blogPosts;
+
+
+    const post = await blogCollection.findOne({
+      slug,
+      status: 'published'
     });
-    
+
     if (!post) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Blog post not found' 
+      return res.status(404).json({
+        success: false,
+        message: 'Blog post not found'
       });
     }
-    
+
     // Increment view count
     await blogCollection.updateOne(
       { slug },
       { $inc: { views: 1 } }
     );
-    
+
     res.json({
       success: true,
       post
     });
-    
+
   } catch (err) {
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error fetching blog post',
-      error: err.message 
+      error: err.message
     });
   }
 };
@@ -117,20 +116,20 @@ const getRelatedPosts = async (req, res) => {
   try {
     const { slug } = req.params;
     const { limit = 3 } = req.query;
-    
-    const db = client.db('ph-a10-DB');
-    const blogCollection = db.collection('blogPosts');
-    
+
+    const blogCollection = dbService.blogPosts;
+
+
     // First get the current post to find related posts
     const currentPost = await blogCollection.findOne({ slug });
-    
+
     if (!currentPost) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Blog post not found' 
+      return res.status(404).json({
+        success: false,
+        message: 'Blog post not found'
       });
     }
-    
+
     // Find related posts by category or tags
     const relatedPosts = await blogCollection
       .find({
@@ -144,17 +143,17 @@ const getRelatedPosts = async (req, res) => {
       .sort({ publishedAt: -1 })
       .limit(parseInt(limit))
       .toArray();
-    
+
     res.json({
       success: true,
       posts: relatedPosts
     });
-    
+
   } catch (err) {
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error fetching related posts',
-      error: err.message 
+      error: err.message
     });
   }
 };
@@ -162,23 +161,23 @@ const getRelatedPosts = async (req, res) => {
 // Get blog categories
 const getBlogCategories = async (req, res) => {
   try {
-    const db = client.db('ph-a10-DB');
-    const blogCollection = db.collection('blogPosts');
-    
-    const categories = await blogCollection.distinct('category', { 
-      status: 'published' 
+    const blogCollection = dbService.blogPosts;
+
+
+    const categories = await blogCollection.distinct('category', {
+      status: 'published'
     });
-    
+
     res.json({
       success: true,
       categories
     });
-    
+
   } catch (err) {
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error fetching categories',
-      error: err.message 
+      error: err.message
     });
   }
 };
@@ -187,26 +186,26 @@ const getBlogCategories = async (req, res) => {
 const getPopularPosts = async (req, res) => {
   try {
     const { limit = 5 } = req.query;
-    
-    const db = client.db('ph-a10-DB');
-    const blogCollection = db.collection('blogPosts');
-    
+
+    const blogCollection = dbService.blogPosts;
+
+
     const popularPosts = await blogCollection
       .find({ status: 'published' })
       .sort({ views: -1 })
       .limit(parseInt(limit))
       .toArray();
-    
+
     res.json({
       success: true,
       posts: popularPosts
     });
-    
+
   } catch (err) {
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error fetching popular posts',
-      error: err.message 
+      error: err.message
     });
   }
 };
@@ -224,17 +223,17 @@ const createBlogPost = async (req, res) => {
       author,
       readTime
     } = req.body;
-    
-    const db = client.db('ph-a10-DB');
-    const blogCollection = db.collection('blogPosts');
-    
+
+    const blogCollection = dbService.blogPosts;
+
+
     // Generate slug from title
     const slug = title
       .toLowerCase()
       .replace(/[^a-z0-9 -]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-');
-    
+
     const newPost = {
       title,
       slug,
@@ -250,27 +249,27 @@ const createBlogPost = async (req, res) => {
       publishedAt: new Date().toISOString(),
       createdAt: new Date().toISOString()
     };
-    
+
     const result = await blogCollection.insertOne(newPost);
-    
+
     res.status(201).json({
       success: true,
       message: 'Blog post created successfully',
       postId: result.insertedId,
       slug: newPost.slug
     });
-    
+
   } catch (err) {
     if (err.code === 11000) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Blog post with this title already exists' 
+      return res.status(400).json({
+        success: false,
+        message: 'Blog post with this title already exists'
       });
     }
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error creating blog post',
-      error: err.message 
+      error: err.message
     });
   }
 };
@@ -279,45 +278,44 @@ const createBlogPost = async (req, res) => {
 const subscribeToNewsletter = async (req, res) => {
   try {
     const { email } = req.body;
-    
+
     if (!email) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Email is required' 
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
       });
     }
-    
-    const db = client.db('ph-a10-DB');
-    const newsletterCollection = db.collection('newsletterSubscriptions');
-    
+
+    const newsletterCollection = dbService.newsletterSubscriptions;
+
     // Check if email already exists
     const existingSubscriber = await newsletterCollection.findOne({ email });
-    
+
     if (existingSubscriber) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Email already subscribed' 
+      return res.status(400).json({
+        success: false,
+        message: 'Email already subscribed'
       });
     }
-    
+
     const newSubscriber = {
       email,
       subscribedAt: new Date().toISOString(),
       isActive: true
     };
-    
+
     await newsletterCollection.insertOne(newSubscriber);
-    
+
     res.json({
       success: true,
       message: 'Successfully subscribed to newsletter'
     });
-    
+
   } catch (err) {
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error subscribing to newsletter',
-      error: err.message 
+      error: err.message
     });
   }
 };
