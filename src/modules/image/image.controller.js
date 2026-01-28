@@ -1,19 +1,17 @@
-const axios = require('axios');
-const FormData = require('form-data');
+import axios from "axios"
+import FormData from 'form-data';
 
-const IMG_BB_API_KEY = process.env.IMGBB_API_KEY;
+const IMG_BB_API_KEY = "8071722e3d8140465d956914d39d6ec3";
+// const IMG_BB_API_KEY = process.env.IMGBB_API_KEY;
 
-exports.uploadImageToImgBB = async (req, res) => {
+const uploadImageToImgBB = async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'Image file is required' });
         }
 
         const formData = new FormData();
-        formData.append('image', req.file.buffer, {
-            filename: req.file.originalname,
-            contentType: req.file.mimetype,
-        });
+        formData.append('image', req.file.buffer.toString('base64'));
 
         const formHeaders = formData.getHeaders();
 
@@ -42,3 +40,5 @@ exports.uploadImageToImgBB = async (req, res) => {
         res.status(500).json({ error: 'Image upload failed' });
     }
 };
+
+export default uploadImageToImgBB

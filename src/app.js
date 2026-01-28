@@ -7,6 +7,7 @@ import { userRoutes } from "./modules/user/user.routes.js"
 import { authRoutes } from "./modules/auth/auth.routes.js"
 import { blogRoutes } from "./modules/blog/blog.routes.js"
 import { favoriteRoutes } from "./modules/favorite/favorite.routes.js"
+import { imageRoutes } from "./modules/image/image.routes.js"
 
 dotenv.config({ path: path.join(process.cwd(), ".env") })
 const app = express()
@@ -43,7 +44,7 @@ async function run() {
         app.use('/', favoriteRoutes);
 
         // image upload route
-        // app.use('/', utilityRoutes);
+        app.use('/', imageRoutes);
 
         //----
         // app.post('/add-roommate', async (req, res) => {
