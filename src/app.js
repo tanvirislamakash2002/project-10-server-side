@@ -1,6 +1,6 @@
 import express from "express"
 import cors from 'cors'
-import  { connectDB, client } from '../config/db.js'
+import  { connectDB } from '../config/db.js'
 import { userRoutes } from "./modules/user/user.routes.js"
 import { authRoutes } from "./modules/auth/auth.routes.js"
 import { blogRoutes } from "./modules/blog/blog.routes.js"
@@ -16,30 +16,28 @@ app.use(express.json())
 
 async function run() {
     try {
-
         await connectDB();
 
         // Role routes 
-        app.use('/api/v1/users', roleRoutes);
+        app.use('/api/v1/role', roleRoutes);
 
         //auth routes
-        app.use('/', authRoutes);
+        app.use('/api/v1/auth', authRoutes);
 
         // users routes
-        app.use('/', userRoutes);
+        app.use('/api/v1/user', userRoutes);
 
         // Listing routes
         app.use('/api/v1/listings', listingsRoutes);
 
         // blog routes
-        app.use('/', blogRoutes);
+        app.use('/api/v1/blog', blogRoutes);
 
         // save to favorite routes
-        app.use('/', favoriteRoutes);
+        app.use('/api/v1/favorite', favoriteRoutes);
 
         // image upload route
-        app.use('/', imageRoutes);
-
+        app.use('/api/v1/image', imageRoutes);
 
     } catch(err) {
         console.log(err);

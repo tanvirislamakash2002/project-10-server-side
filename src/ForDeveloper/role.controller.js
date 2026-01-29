@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { dbService } from "../services/database.service.js";
+import { roleService } from "./role.service.js";
 
 const updateUserRole = async (req, res) => {
     try {
@@ -22,21 +23,8 @@ const updateUserRole = async (req, res) => {
             });
         }
 
-        const userCollection = dbService.users;
-
         // Update only if user is a developer
-        const result = await userCollection.updateOne(
-            {
-                _id: new ObjectId(userId),
-                developer: 'true' // Only allow role change for developers
-            },
-            {
-                $set: {
-                    role: role,
-                    updatedAt: new Date()
-                }
-            }
-        );
+        const result = await roleService.updateRole(userId, role);
 
         if (result.matchedCount === 0) {
             return res.status(404).json({
