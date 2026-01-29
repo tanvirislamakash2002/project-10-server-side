@@ -19,6 +19,18 @@ const updateRole = async (userId, role) => {
     return result
 }
 
+const getCurrentRole = async (userId) => {
+    const userCollection = dbService.users;
+
+    const result = await userCollection.findOne(
+            { _id: new ObjectId(userId) },
+            { projection: { role: 1, developer: 1, email: 1 } }
+        );
+
+    return result
+}
+
 export const roleService = {
-    updateRole
+    updateRole,
+    getCurrentRole
 }

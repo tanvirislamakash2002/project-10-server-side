@@ -52,14 +52,7 @@ const getCurrentUserRole = async (req, res) => {
     try {
         const { userId } = req.params;
 
-        // Get database from app
-        const userCollection = dbService.users;
-
-
-        const user = await userCollection.findOne(
-            { _id: new ObjectId(userId) },
-            { projection: { role: 1, developer: 1, email: 1 } }
-        );
+        const user = await roleService.getCurrentRole(userId)
 
         if (!user) {
             return res.status(404).json({
