@@ -4,9 +4,9 @@ const router = express.Router();
 
 
 // GET user by email 
-router.get('/users/:email', userController.getUserByEmail);
+router.get('/:email', userController.getUserByEmail);
 
 // GET user role by email
-router.get('/users/:email/role', userController.getUserRole);
+router.get('/:email/role', userController.getUserRole);
 
 export const userRoutes = router;

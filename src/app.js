@@ -34,7 +34,7 @@ async function run() {
         app.use('/api/v1/blog', blogRoutes);
 
         // save to favorite routes
-        app.use('/api/v1/favorite', favoriteRoutes);
+        app.use('/api/v1/favorites', favoriteRoutes);
 
         // image upload route
         app.use('/api/v1/image', imageRoutes);
