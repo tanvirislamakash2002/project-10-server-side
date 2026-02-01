@@ -12,7 +12,14 @@ const getAllActiveListings = async () => {
     return result
 }
 
+const getSingleListings = async (query) => {
+    const listingCollection = dbService.listings;
+    const result = await listingCollection.findOne(query)
+    return result
+}
+
 export const listingService = {
     createNewListings,
-    getAllActiveListings
+    getAllActiveListings,
+    getSingleListings
 }

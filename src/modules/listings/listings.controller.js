@@ -17,9 +17,7 @@ const getAllActiveListings = async (req, res) => {
 const getSingleListings = async (req, res) => {
     const id = req.params.id;
     const query = { _id: new ObjectId(id) }
-    const listingCollection = dbService.listings;
-
-    const result = await listingCollection.findOne(query)
+    const result = await listingService.getSingleListings(query)
     res.send(result)
 }
 
