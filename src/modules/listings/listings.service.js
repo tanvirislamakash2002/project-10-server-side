@@ -18,8 +18,15 @@ const getSingleListings = async (query) => {
     return result
 }
 
+const updateListings = async (filter, updatedDoc, options) => {
+    const listingCollection = dbService.listings;
+    const result = await listingCollection.updateOne(filter, updatedDoc, options)
+    res.send(result)
+}
+
 export const listingService = {
     createNewListings,
     getAllActiveListings,
-    getSingleListings
+    getSingleListings,
+    updateListings
 }

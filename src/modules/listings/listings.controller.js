@@ -29,9 +29,7 @@ const updateListings = async (req, res) => {
     const updatedDoc = {
         $set: updatedData
     }
-    const listingCollection = dbService.listings;
-
-    const result = await listingCollection.updateOne(filter, updatedDoc, options)
+    const result = await listingService.updateListings(filter, updatedDoc, options)
 
     res.send(result)
 }
