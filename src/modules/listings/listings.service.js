@@ -6,6 +6,13 @@ const createNewListings = async (data) => {
     return result
 }
 
+const getAllActiveListings = async () => {
+    const listingCollection = dbService.listings;
+    const result = await listingCollection.find().toArray()
+    return result
+}
+
 export const listingService = {
-    createNewListings
+    createNewListings,
+    getAllActiveListings
 }

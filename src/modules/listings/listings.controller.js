@@ -5,13 +5,12 @@ import { listingService } from "./listings.service.js";
 
 const createNewListings = async (req, res) => {
     const data = req.body;
-    const result = await listingService(data)
+    const result = await listingService.createNewListings(data)
     res.send(result)
 }
 
 const getAllActiveListings = async (req, res) => {
-    const listingCollection = dbService.listings;
-    const result = await listingCollection.find().toArray()
+    const result = await listingService.getAllActiveListings()
     res.send(result)
 }
 
