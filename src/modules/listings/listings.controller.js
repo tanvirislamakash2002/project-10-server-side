@@ -1,12 +1,11 @@
+import { ObjectId } from "mongodb";
 import { dbService } from "../../services/database.service.js";
+import { listingService } from "./listings.service.js";
 
 
 const createNewListings = async (req, res) => {
-
-    const listingCollection = dbService.listings;
-
-    const newRoommate = req.body;
-    const result = await listingCollection.insertOne(newRoommate)
+    const data = req.body;
+    const result = await listingService(data)
     res.send(result)
 }
 
