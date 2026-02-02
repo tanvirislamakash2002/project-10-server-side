@@ -14,53 +14,91 @@ const getAllActiveListings = async (req, res) => {
     // res.send(result)
 // ------------------------------
 const listingCollection = dbService.listings;
-      const {
-    priceMin, priceMax, location, roomType, propertyType,
-    gender, amenities, verifiedOnly, ageMin, ageMax,
-    page = 1, limit = 20, sortBy = 'createdAt', order = 'desc'
-  } = req.query;
-  
-  // Build MongoDB query
-  const query = { status: 'accepted' };
-  
-  // Price filter
-  if (priceMin || priceMax) {
-    query['pricing.monthlyRent'] = {};
-    if (priceMin) query['pricing.monthlyRent'].$gte = Number(priceMin);
-    if (priceMax) query['pricing.monthlyRent'].$lte = Number(priceMax);
-  }
-  
-  // Location filter (text search)
-  if (location) {
-    query.$or = [
-      { 'location.address.city': new RegExp(location, 'i') },
-      { 'location.address.state': new RegExp(location, 'i') },
-      { 'location.address.street': new RegExp(location, 'i') },
-      { 'location.neighborhood': new RegExp(location, 'i') }
-    ];
-  }
-  
-  // Room type filter
-  if (roomType) {
-    query.roomType = { $in: roomType.split(',') };
-  }
-  
-  // Execute query with pagination
-  const skip = (page - 1) * limit;
-  const [listings, total] = await Promise.all([
-    listingCollection.find(query)
-      .sort({ [sortBy]: order === 'desc' ? -1 : 1 })
-      .skip(skip)
-      .limit(Number(limit))
-      .toArray(),
-    listingCollection.countDocuments(query)
-  ]);
-  
-  res.json({
-    success: true,
-    data: listings,
-    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
-  });
+const {
+  priceMin, priceMax, location, roomType, propertyType,
+  gender, amenities, verifiedOnly, ageMin, ageMax,
+  page = 1, limit = 20, sortBy = 'createdAt', order = 'desc'
+} = req.query;
+
+// Build MongoDB query - match your database structure
+const query = { status: 'accepted' };
+
+// 1. PRICE FILTER (rent, not monthlyRent)
+if (priceMin || priceMax) {
+  query['pricing.rent'] = {};
+  if (priceMin) query['pricing.rent'].$gte = Number(priceMin);
+  if (priceMax) query['pricing.rent'].$lte = Number(priceMax);
+}
+
+// 2. LOCATION FILTER (address, not location.address)
+if (location) {
+  query.$or = [
+    { 'address.city': new RegExp(location, 'i') },
+    { 'address.state': new RegExp(location, 'i') },
+    { 'address.street': new RegExp(location, 'i') }
+  ];
+}
+
+// 3. ROOM TYPE FILTER
+if (roomType) {
+  // Convert comma-separated string to array
+  const roomTypes = roomType.split(',');
+  query.roomType = { $in: roomTypes };
+}
+
+// 4. PROPERTY TYPE FILTER !
+if (propertyType) {
+  const propertyTypes = propertyType.split(',');
+  query.propertyType = { $in: propertyTypes };
+}
+
+// 5. GENDER FILTER !
+if (gender && gender !== 'any') {
+  query.preferredGender = gender; 
+  // query.$or = [
+  //   { preferredGender: gender },
+  //   { preferredGender: 'No Preference' }
+  // ];
+}
+
+// 6. AMENITIES FILTER !
+if (amenities) {
+  const amenityArray = amenities.split(',');
+  query.amenities = { $all: amenityArray };
+}
+
+// 7. AGE RANGE FILTER !
+if (ageMin || ageMax) {
+  query['preferredAgeRange'] = {};
+  if (ageMin) query['preferredAgeRange'].$gte = Number(ageMin);
+  if (ageMax) query['preferredAgeRange'].$lte = Number(ageMax);
+}
+
+// 8. VERIFIED FILTER !
+// Note: Your data doesn't have verified field!
+// You might need to add this field or adjust logic
+if (verifiedOnly === 'true') {
+  // query['provider.verified'] = true;
+
+  // query['poster.verified'] = true;
+}
+
+// Execute query with pagination
+const skip = (page - 1) * limit;
+const [listings, total] = await Promise.all([
+  listingCollection.find(query)
+    .sort({ [sortBy]: order === 'desc' ? -1 : 1 })
+    .skip(skip)
+    .limit(Number(limit))
+    .toArray(),
+  listingCollection.countDocuments(query)
+]);
+
+res.json({
+  success: true,
+  data: listings,
+  pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
+});
 }
 
 const getSingleListings = async (req, res) => {
