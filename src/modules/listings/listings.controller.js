@@ -10,8 +10,57 @@ const createNewListings = async (req, res) => {
 }
 
 const getAllActiveListings = async (req, res) => {
-    const result = await listingService.getAllActiveListings()
-    res.send(result)
+    // const result = await listingService.getAllActiveListings()
+    // res.send(result)
+// ------------------------------
+const listingCollection = dbService.listings;
+      const {
+    priceMin, priceMax, location, roomType, propertyType,
+    gender, amenities, verifiedOnly, ageMin, ageMax,
+    page = 1, limit = 20, sortBy = 'createdAt', order = 'desc'
+  } = req.query;
+  
+  // Build MongoDB query
+  const query = { status: 'accepted' };
+  
+  // Price filter
+  if (priceMin || priceMax) {
+    query['pricing.monthlyRent'] = {};
+    if (priceMin) query['pricing.monthlyRent'].$gte = Number(priceMin);
+    if (priceMax) query['pricing.monthlyRent'].$lte = Number(priceMax);
+  }
+  
+  // Location filter (text search)
+  if (location) {
+    query.$or = [
+      { 'location.address.city': new RegExp(location, 'i') },
+      { 'location.address.state': new RegExp(location, 'i') },
+      { 'location.address.street': new RegExp(location, 'i') },
+      { 'location.neighborhood': new RegExp(location, 'i') }
+    ];
+  }
+  
+  // Room type filter
+  if (roomType) {
+    query.roomType = { $in: roomType.split(',') };
+  }
+  
+  // Execute query with pagination
+  const skip = (page - 1) * limit;
+  const [listings, total] = await Promise.all([
+    listingCollection.find(query)
+      .sort({ [sortBy]: order === 'desc' ? -1 : 1 })
+      .skip(skip)
+      .limit(Number(limit))
+      .toArray(),
+    listingCollection.countDocuments(query)
+  ]);
+  
+  res.json({
+    success: true,
+    data: listings,
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
+  });
 }
 
 const getSingleListings = async (req, res) => {

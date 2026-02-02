@@ -1,4 +1,4 @@
-import { dbService } from "../../services/database.service";
+import { dbService } from "../../services/database.service.js";
 
 const createNewListings = async (data) => {
     const listingCollection = dbService.listings;
