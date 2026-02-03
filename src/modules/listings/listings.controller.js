@@ -10,95 +10,172 @@ const createNewListings = async (req, res) => {
 }
 
 const getAllActiveListings = async (req, res) => {
-    // const result = await listingService.getAllActiveListings()
-    // res.send(result)
-// ------------------------------
-const listingCollection = dbService.listings;
-const {
-  priceMin, priceMax, location, roomType, propertyType,
-  gender, amenities, verifiedOnly, ageMin, ageMax,
-  page = 1, limit = 20, sortBy = 'createdAt', order = 'desc'
-} = req.query;
 
-// Build MongoDB query - match your database structure
-const query = { status: 'accepted' };
-
-// 1. PRICE FILTER (rent, not monthlyRent)
-if (priceMin || priceMax) {
-  query['pricing.rent'] = {};
-  if (priceMin) query['pricing.rent'].$gte = Number(priceMin);
-  if (priceMax) query['pricing.rent'].$lte = Number(priceMax);
-}
-
-// 2. LOCATION FILTER (address, not location.address)
-if (location) {
-  query.$or = [
-    { 'address.city': new RegExp(location, 'i') },
-    { 'address.state': new RegExp(location, 'i') },
-    { 'address.street': new RegExp(location, 'i') }
-  ];
-}
-
-// 3. ROOM TYPE FILTER
-if (roomType) {
-  // Convert comma-separated string to array
-  const roomTypes = roomType.split(',');
-  query.roomType = { $in: roomTypes };
-}
-
-// 4. PROPERTY TYPE FILTER !
-if (propertyType) {
-  const propertyTypes = propertyType.split(',');
-  query.propertyType = { $in: propertyTypes };
-}
-
-// 5. GENDER FILTER !
-if (gender && gender !== 'any') {
-  query.preferredGender = gender; 
-  // query.$or = [
-  //   { preferredGender: gender },
-  //   { preferredGender: 'No Preference' }
-  // ];
-}
-
-// 6. AMENITIES FILTER !
-if (amenities) {
-  const amenityArray = amenities.split(',');
-  query.amenities = { $all: amenityArray };
-}
-
-// 7. AGE RANGE FILTER !
-if (ageMin || ageMax) {
-  query['preferredAgeRange'] = {};
-  if (ageMin) query['preferredAgeRange'].$gte = Number(ageMin);
-  if (ageMax) query['preferredAgeRange'].$lte = Number(ageMax);
-}
-
-// 8. VERIFIED FILTER !
-// Note: Your data doesn't have verified field!
-// You might need to add this field or adjust logic
-if (verifiedOnly === 'true') {
-  // query['provider.verified'] = true;
-
-  // query['poster.verified'] = true;
-}
-
-// Execute query with pagination
-const skip = (page - 1) * limit;
-const [listings, total] = await Promise.all([
-  listingCollection.find(query)
-    .sort({ [sortBy]: order === 'desc' ? -1 : 1 })
-    .skip(skip)
-    .limit(Number(limit))
-    .toArray(),
-  listingCollection.countDocuments(query)
-]);
-
-res.json({
-  success: true,
-  data: listings,
-  pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
-});
+  try {
+    const listingCollection = dbService.listings;
+    
+    // Parse query parameters
+    const {
+      price_min, price_max, location, room_type, property_type,
+      gender, amenities, verified_only, age_min, age_max,
+      page = 1, limit = 20, sort_by = 'createdAt', sort_order = 'desc'
+    } = req.query;
+    
+    console.log('🔍 Received query params:', req.query);
+    
+    // Build MongoDB query
+    const query = { status: 'accepted' };
+    
+    // 1. PRICE FILTER - Handle STRING values in database
+    if (price_min || price_max) {
+      // Since rent is stored as string, use $expr for numeric comparison
+      query.$expr = {
+        $and: []
+      };
+      
+      if (price_min) {
+        query.$expr.$and.push({
+          $gte: [
+            { $toDouble: { $ifNull: ["$pricing.rent", "0"] } }, // Convert string to number
+            Number(price_min)
+          ]
+        });
+      }
+      
+      if (price_max) {
+        query.$expr.$and.push({
+          $lte: [
+            { $toDouble: { $ifNull: ["$pricing.rent", "0"] } },
+            Number(price_max)
+          ]
+        });
+      }
+    }
+    
+    // 2. LOCATION FILTER
+    if (location && location.trim() !== '') {
+      const searchRegex = new RegExp(location.trim(), 'i');
+      query.$or = [
+        { 'address.city': searchRegex },
+        { 'address.state': searchRegex },
+        { 'address.street': searchRegex }
+      ];
+    }
+    
+    // 3. ROOM TYPE FILTER - Case insensitive
+    if (room_type && room_type.trim() !== '') {
+      const roomTypes = room_type.split(',').map(t => t.trim());
+      // Create case-insensitive regex for each type
+      query.$or = roomTypes.map(type => ({
+        roomType: new RegExp(`^${type}$`, 'i')
+      }));
+    }
+    
+    // 4. PROPERTY TYPE FILTER - Case insensitive
+    if (property_type && property_type.trim() !== '') {
+      const propertyTypes = property_type.split(',').map(t => t.trim());
+      query.$or = propertyTypes.map(type => ({
+        propertyType: new RegExp(`^${type}$`, 'i')
+      }));
+    }
+    
+    // 5. GENDER FILTER - Handle "No Preference" and case
+    if (gender && gender !== 'any') {
+      const genderRegex = new RegExp(`^${gender}$`, 'i');
+      query.$or = [
+        { preferredGender: genderRegex },
+        { preferredGender: /^no preference$/i } // Also match "No Preference"
+      ];
+    }
+    
+    // 6. AMENITIES FILTER - Handle string comparison
+    if (amenities && amenities.trim() !== '') {
+      const amenityArray = amenities.split(',').map(a => a.trim());
+      // Use $all for array contains all specified amenities
+      query.amenities = { $all: amenityArray };
+    }
+    
+    // 7. AGE RANGE FILTER - Handle STRING values in nested object
+    if (age_min || age_max) {
+      // Since age is stored as string in nested object
+      const ageConditions = [];
+      
+      if (age_min) {
+        ageConditions.push({
+          $gte: [
+            { $toDouble: { $ifNull: ["$preferredAgeRange.min", "0"] } },
+            Number(age_min)
+          ]
+        });
+      }
+      
+      if (age_max) {
+        ageConditions.push({
+          $lte: [
+            { $toDouble: { $ifNull: ["$preferredAgeRange.max", "100"] } },
+            Number(age_max)
+          ]
+        });
+      }
+      
+      // Add to $expr if it exists, otherwise create it
+      if (!query.$expr) {
+        query.$expr = { $and: [] };
+      }
+      
+      query.$expr.$and.push(...ageConditions);
+    }
+    
+    // 8. VERIFIED FILTER - Skip since your data doesn't have this field
+    // if (verified_only === 'true') {
+    //   // Your data doesn't have verified field
+    // }
+    
+    // Debug: Log the final query
+    console.log('🔍 MongoDB Query:', JSON.stringify(query, null, 2));
+    
+    // Sorting
+    const sortOption = {};
+    const sortField = sort_by || 'createdAt';
+    const sortDirection = sort_order === 'asc' ? 1 : -1;
+    sortOption[sortField] = sortDirection;
+    
+    // Pagination
+    const skip = (page - 1) * limit;
+    
+    // Execute query
+    const [listings, total] = await Promise.all([
+      listingCollection.find(query)
+        .sort(sortOption)
+        .skip(skip)
+        .limit(Number(limit))
+        .toArray(),
+      listingCollection.countDocuments(query)
+    ]);
+    
+    console.log(`✅ Found ${listings.length} listings (total matching: ${total})`);
+    
+    res.json({
+      success: true,
+      data: listings,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: Number(page) < Math.ceil(total / limit),
+        hasPrev: Number(page) > 1
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Filter error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error filtering listings',
+      error: error.message
+    });
+  }
 }
 
 const getSingleListings = async (req, res) => {
