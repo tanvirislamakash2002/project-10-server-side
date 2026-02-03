@@ -133,6 +133,13 @@ const buildFilterQuery = (queryParams) => {
   return query;
 };
 
+const buildSortOptions = (sort_by = 'createdAt', sort_order = 'desc') => {
+  const sortOption = {};
+  const sortDirection = sort_order === 'asc' ? 1 : -1;
+  sortOption[sort_by] = sortDirection;
+  return sortOption;
+};
+
 
 
 export const listingService = {
