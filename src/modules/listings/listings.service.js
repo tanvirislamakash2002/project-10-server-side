@@ -156,7 +156,39 @@ const calculatePagination = (page = 1, limit = 20, total) => {
   };
 };
 
-
+const getAllListings = async (listingCollection, queryParams) => {
+  const {
+    page = 1,
+    limit = 20,
+    sort_by = 'createdAt',
+    sort_order = 'desc'
+  } = queryParams;
+  
+  // Build query
+  const query = buildFilterQuery(queryParams);
+  
+  // Build sort options
+  const sortOption = buildSortOptions(sort_by, sort_order);
+  
+  // Execute queries
+  const [listings, total] = await Promise.all([
+    listingCollection.find(query)
+      .sort(sortOption)
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .toArray(),
+    listingCollection.countDocuments(query)
+  ]);
+  
+  // Calculate pagination
+  const pagination = calculatePagination(page, limit, total);
+  
+  return {
+    listings,
+    total,
+    pagination
+  };
+};
 
 export const listingService = {
     createNewListings,
