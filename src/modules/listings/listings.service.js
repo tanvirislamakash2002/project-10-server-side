@@ -24,6 +24,117 @@ const updateListings = async (filter, updatedDoc, options) => {
     res.send(result)
 }
 
+// services/listing.service.js
+const buildFilterQuery = (queryParams) => {
+  const {
+    price_min, price_max, location, room_type, property_type,
+    gender, amenities, age_min, age_max
+  } = queryParams;
+  
+  const query = { status: 'accepted' };
+  
+  // Price Filter
+  if (price_min || price_max) {
+    query.$expr = { $and: [] };
+    
+    if (price_min) {
+      query.$expr.$and.push({
+        $gte: [
+          { $toDouble: { $ifNull: ["$pricing.rent", "0"] } },
+          Number(price_min)
+        ]
+      });
+    }
+    
+    if (price_max) {
+      query.$expr.$and.push({
+        $lte: [
+          { $toDouble: { $ifNull: ["$pricing.rent", "0"] } },
+          Number(price_max)
+        ]
+      });
+    }
+  }
+  
+  // Location Filter
+  if (location && location.trim() !== '') {
+    const searchRegex = new RegExp(location.trim(), 'i');
+    query.$or = [
+      { 'address.city': searchRegex },
+      { 'address.state': searchRegex },
+      { 'address.street': searchRegex }
+    ];
+  }
+  
+  // Room Type Filter
+  if (room_type && room_type.trim() !== '') {
+    const roomTypes = room_type.split(',').map(t => t.trim());
+    query.$or = query.$or || [];
+    query.$or.push(...roomTypes.map(type => ({
+      roomType: new RegExp(`^${type}$`, 'i')
+    })));
+  }
+  
+  // Property Type Filter
+  if (property_type && property_type.trim() !== '') {
+    const propertyTypes = property_type.split(',').map(t => t.trim());
+    query.$or = query.$or || [];
+    query.$or.push(...propertyTypes.map(type => ({
+      propertyType: new RegExp(`^${type}$`, 'i')
+    })));
+  }
+  
+  // Gender Filter
+  if (gender && gender !== 'any') {
+    const genderRegex = new RegExp(`^${gender}$`, 'i');
+    query.$or = query.$or || [];
+    query.$or.push(
+      { preferredGender: genderRegex },
+      { preferredGender: /^no preference$/i }
+    );
+  }
+  
+  // Amenities Filter
+  if (amenities && amenities.trim() !== '') {
+    const amenityArray = amenities.split(',').map(a => a.trim());
+    query.amenities = { $all: amenityArray };
+  }
+  
+  // Age Range Filter
+  if (age_min || age_max) {
+    const ageConditions = [];
+    
+    if (age_min) {
+      ageConditions.push({
+        $gte: [
+          { $toDouble: { $ifNull: ["$preferredAgeRange.min", "0"] } },
+          Number(age_min)
+        ]
+      });
+    }
+    
+    if (age_max) {
+      ageConditions.push({
+        $lte: [
+          { $toDouble: { $ifNull: ["$preferredAgeRange.max", "100"] } },
+          Number(age_max)
+        ]
+      });
+    }
+    
+    if (ageConditions.length > 0) {
+      if (!query.$expr) {
+        query.$expr = { $and: [] };
+      }
+      query.$expr.$and.push(...ageConditions);
+    }
+  }
+  
+  return query;
+};
+
+
+
 export const listingService = {
     createNewListings,
     getAllActiveListings,
