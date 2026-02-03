@@ -140,6 +140,22 @@ const buildSortOptions = (sort_by = 'createdAt', sort_order = 'desc') => {
   return sortOption;
 };
 
+const calculatePagination = (page = 1, limit = 20, total) => {
+  const currentPage = Number(page);
+  const pageSize = Number(limit);
+  const totalPages = Math.ceil(total / pageSize);
+  
+  return {
+    page: currentPage,
+    limit: pageSize,
+    skip: (currentPage - 1) * pageSize,
+    total,
+    totalPages,
+    hasNext: currentPage < totalPages,
+    hasPrev: currentPage > 1
+  };
+};
+
 
 
 export const listingService = {
