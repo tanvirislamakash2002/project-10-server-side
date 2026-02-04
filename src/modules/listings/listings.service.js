@@ -1,4 +1,5 @@
 import { dbService } from "../../services/database.service.js";
+import { getDateRangeFromTimeline } from "../../utils/dateUtils.js";
 
 const createNewListings = async (data) => {
     const listingCollection = dbService.listings;
@@ -6,11 +7,6 @@ const createNewListings = async (data) => {
     return result
 }
 
-// const getAllActiveListings = async () => {
-//     const listingCollection = dbService.listings;
-//     const result = await listingCollection.find().toArray()
-//     return result
-// }
 
 const getSingleListings = async (query) => {
     const listingCollection = dbService.listings;
@@ -24,7 +20,6 @@ const updateListings = async (filter, updatedDoc, options) => {
     res.send(result)
 }
 
-// services/listing.service.js
 const buildFilterQuery = (queryParams) => {
     const {
         price_min, price_max, location, moveInTimeline, room_type, property_type,
@@ -69,17 +64,16 @@ const buildFilterQuery = (queryParams) => {
     if (moveInTimeline && moveInTimeline !== 'flexible') {
         const dateRange = getDateRangeFromTimeline(moveInTimeline);
 
+        const startStr = dateRange.start.toISOString().split('T')[0];
+        const endStr = dateRange.end.toISOString().split('T')[0];
+
         if (dateRange) {
-            // Find listings where availableFrom is between start and end dates
-            // OR availableFrom is before/on end date (for "available by" logic)
-            filter.availableFrom = {
-                $lte: dateRange.end
+            query.availableFrom = {
+                $lte: endStr,
+                $gte: startStr
             };
 
-            // For "immediate" and "within_week", also check if not too far in future
-            if (['immediate', 'within_week'].includes(moveInTimeline)) {
-                filter.availableFrom.$gte = dateRange.start;
-            }
+
         }
     }
 

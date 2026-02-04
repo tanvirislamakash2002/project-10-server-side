@@ -14,9 +14,6 @@ const getAllActiveListings = async (req, res) => {
  try {
     const listingCollection = dbService.listings;
     
-    // Log received parameters
-    console.log('🔍 Received query params:', req.query);
-    
     // Get listings using service layer
     const { listings, total, pagination } = await listingService.getAllListings(
       listingCollection,
