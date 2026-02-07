@@ -21,6 +21,10 @@ class DatabaseService {
         return this.getCollection('listings')
     }
 
+    get applications() {
+        return this.getCollection('applications')
+    }
+
     get blogPosts() {
         return this.getCollection('blogPosts')
     }

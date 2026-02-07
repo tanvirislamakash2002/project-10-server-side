@@ -1,6 +1,6 @@
 import express from "express"
 import cors from 'cors'
-import  { connectDB } from '../config/db.js'
+import { connectDB } from '../config/db.js'
 import { userRoutes } from "./modules/user/user.routes.js"
 import { authRoutes } from "./modules/auth/auth.routes.js"
 import { blogRoutes } from "./modules/blog/blog.routes.js"
@@ -8,6 +8,7 @@ import { favoriteRoutes } from "./modules/favorite/favorite.routes.js"
 import { imageRoutes } from "./modules/image/image.routes.js"
 import { listingsRoutes } from "./modules/listings/listings.routes.js"
 import { roleRoutes } from "./ForDeveloper/roleRoutes.js"
+import { applicationRoutes } from "./modules/application/application.routes.js"
 
 const app = express()
 
@@ -30,6 +31,9 @@ async function run() {
         // Listing routes
         app.use('/api/v1/listings', listingsRoutes);
 
+        // Listing routes
+        app.use('/api/v1/application', applicationRoutes);
+
         // blog routes
         app.use('/api/v1/blog', blogRoutes);
 
@@ -39,7 +43,7 @@ async function run() {
         // image upload route
         app.use('/api/v1/image', imageRoutes);
 
-    } catch(err) {
+    } catch (err) {
         console.log(err);
     }
 }
