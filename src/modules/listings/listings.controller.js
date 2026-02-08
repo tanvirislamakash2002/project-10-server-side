@@ -21,7 +21,7 @@ const getAllActiveListings = async (req, res) => {
     );
     
     // Log query results
-    console.log(` Found ${listings.length} listings (total matching: ${total})`);
+    // console.log(` Found ${listings.length} listings (total matching: ${total})`);
     
     // Send response
     res.json({

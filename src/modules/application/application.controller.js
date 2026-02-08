@@ -1,4 +1,5 @@
 import { dbService } from "../../services/database.service.js"
+import { applicationServices } from "./application.service.js"
 
 
 const application = async (req, res) => {
@@ -10,7 +11,9 @@ const application = async (req, res) => {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         }
-        const result = await applicationCollection.insertOne(data)
+
+console.log(req.user);
+        // const result = await applicationCollection.insertOne(data)
         res.status(200).json({
             success: true,
             result
@@ -24,6 +27,12 @@ const application = async (req, res) => {
     }
 }
 
+const ifApplicationExist = async (req, res) => {
+
+    const result = await applicationServices.ifApplicationExist(req.body)
+}
+
 export const applicationController = {
-    application
+    application,
+    ifApplicationExist
 }
