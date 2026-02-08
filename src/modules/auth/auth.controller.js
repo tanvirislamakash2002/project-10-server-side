@@ -1,6 +1,7 @@
 import { client } from "../../../config/db.js";
 import { authMiddleware } from "../../middleware/auth.js";
 import { dbService } from "../../services/database.service.js";
+import { authServices } from "./auth.service.js";
 
 
 const loginUser = async (req, res) => {
@@ -8,25 +9,36 @@ const loginUser = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
     }
 
-    const db = client.db('ph-a10-DB');
-    const usersCollection = db.collection('users');
+    const user = await authServices.checkUserEmail(email)
+    if (user) {
+      const token = authMiddleware.generateToken(user._id, email, user.role)
+      const result = await authServices.loginUser(email);
 
-    // Update last login time:
-    const result = await usersCollection.updateOne(
-      { email },
-      { $set: { lastLogin: new Date().toISOString() } }
-    );
+      res.status(200).json({
+        success:true,
+        message: 'Login recorded',
+        token,
+        result
+      });
 
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ message: 'User not found' });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
     }
 
-    res.json({ message: 'Login recorded', email });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      message: err.message,
+      details:err
+    });
   }
 };
 
@@ -77,16 +89,20 @@ const registerUser = async (req, res) => {
 const checkUserEmail = async (req, res) => {
   try {
     const { email } = req.query;
+
     if (!email) {
-      return res.status(400).json({ exists: false, message: 'No email provided' });
+      return res.status(400).json({
+        exists: false,
+        message: 'No email provided'
+      });
     }
 
-    const db = client.db('ph-a10-DB');
-    const usersCollection = db.collection('users');
+    const user = await authServices.checkUserEmail(email)
 
-    const user = await usersCollection.findOne({ email });
-
-    res.json({ exists: !!user });
+    res.status(200).json({
+      exists: !!user,
+      user
+    });
 
   } catch (err) {
     res.status(500).json({ message: err.message });
