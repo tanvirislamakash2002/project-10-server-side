@@ -1,4 +1,6 @@
 import { client } from "../../../config/db.js";
+import { authMiddleware } from "../../middleware/auth.js";
+import { dbService } from "../../services/database.service.js";
 
 
 const loginUser = async (req, res) => {
@@ -32,8 +34,13 @@ const registerUser = async (req, res) => {
   try {
     const { name, email, photoURL, role } = req.body;
 
-    const db = client.db('ph-a10-DB');
-    const usersCollection = db.collection('users');
+    if (!email || !name) {
+      return res.status(400).json({ error: "Missing required fields" })
+    }
+
+
+    const usersCollection = dbService.users
+    const findUser = await usersCollection.findOne({ email })
 
     const newUser = {
       name,
@@ -44,19 +51,26 @@ const registerUser = async (req, res) => {
       createdAtString: new Date().toISOString(),
       lastLogin: new Date().toISOString(),
     };
+    if (!findUser) {
 
-    const result = await usersCollection.insertOne(newUser);
+      const result = await usersCollection.insertOne(newUser);
+      const token = authMiddleware.generateToken(result.insertedId, email, role)
+      res.status(201).json({
+        success: true,
+        token,
+        userId: result.insertedId
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        result: 'user already exist'
+      });
 
-    res.status(201).json({
-      success: true,
-      userId: result.insertedId
-    });
+    }
 
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(400).json({ error: "Email already exists" });
-    }
-    res.status(500).json({ error: "Database error" });
+
+    res.status(500).json({ message: err.message, details: err });
   }
 };
 
