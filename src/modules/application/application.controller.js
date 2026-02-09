@@ -12,7 +12,7 @@ const application = async (req, res) => {
             updatedAt: new Date().toISOString(),
         }
 
-console.log(req.user);
+        console.log('akash req user', req.user);
         // const result = await applicationCollection.insertOne(data)
         res.status(200).json({
             success: true,
@@ -29,7 +29,14 @@ console.log(req.user);
 
 const ifApplicationExist = async (req, res) => {
 
-    const result = await applicationServices.ifApplicationExist(req.body)
+    const { _id:applicant_id } = req?.user;
+    const { listing_id } = req?.query;
+
+    // const result = await applicationServices.ifApplicationExist(req)
+    res.status(200).json({
+        message: true,
+        user: {applicant_id, listing_id}
+    })
 }
 
 export const applicationController = {

@@ -20,10 +20,9 @@ const protect = async (req, res, next) => {
 
         //  find user in database
         const usersCollection = dbService.users;
-        const user = await usersCollection.find({
-            email: decoded.email
-        }).select('-__v')
-        console.log('auth in jwt', user);
+        const user = await usersCollection.findOne({
+            email: decoded?.email
+        })
 
         if (!user) {
             return res.status(401).json({ error: 'User not found' })
