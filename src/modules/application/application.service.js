@@ -12,6 +12,15 @@ const ifApplicationExist = async (applicant_id, listing_id) => {
     const result = await applicationCollection.findOne(query)
     return result
 }
+
+const application = async (data) => {
+    const applicationCollection = dbService.applications
+
+    const result = await applicationCollection.insertOne(data)
+    return result
+
+}
 export const applicationServices = {
-    ifApplicationExist
+    ifApplicationExist,
+    application
 }  

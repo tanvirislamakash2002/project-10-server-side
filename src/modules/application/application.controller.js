@@ -4,16 +4,13 @@ import { applicationServices } from "./application.service.js"
 
 const application = async (req, res) => {
     try {
-        const applicationCollection = dbService.applications
-
         const data = {
             ...req.body,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         }
 
-        console.log('akash req user', req.user);
-        const result = await applicationCollection.insertOne(data)
+        const result = await applicationServices.application(data)
         res.status(200).json({
             success: true,
             result
