@@ -5,10 +5,9 @@ const ifApplicationExist = async (applicant_id, listing_id) => {
 
     const query = {
         listingId: listing_id,
-        applicantId: "69860b6c9b5a62d35f79733b",
+        applicantId: applicant_id,
         status: 'pending'
     }
-
     const result = await applicationCollection.findOne(query)
     return result
 }

@@ -4,17 +4,30 @@ import { applicationServices } from "./application.service.js"
 
 const application = async (req, res) => {
     try {
+        const { _id } = req?.user;
+        const applicant_id = _id.toString()
+        const { listingId } = req?.body;
+
         const data = {
             ...req.body,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         }
 
-        const result = await applicationServices.application(data)
-        res.status(200).json({
-            success: true,
-            result
+        const ifApplicationExist = await applicationServices.ifApplicationExist(applicant_id, listingId)
+        if (!ifApplicationExist) {
+            const result = await applicationServices.application(data)
+            res.status(200).json({
+                success: true,
+                result
+            })
+        }
+        res.status(404).json({
+            success: false,
+            message:"application is pending",
+            ifApplicationExist
         })
+
     } catch (err) {
         res.status(500).json({
             success: false,
@@ -26,14 +39,14 @@ const application = async (req, res) => {
 
 const ifApplicationExist = async (req, res) => {
 
-    const { _id: applicant_id } = req?.user;
+    const { _id} = req?.user;
+    const applicantId = _id.toString()
     const { listing_id } = req?.query;
-
-    const result = await applicationServices.ifApplicationExist(applicant_id, listing_id)
+    const ifApplicationExist = await applicationServices.ifApplicationExist(applicantId, listing_id)
     res.status(200).json({
         success: true,
-        details: result,
-        user: { applicant_id, listing_id }
+        details: ifApplicationExist,
+        user: { applicantId, listing_id }
     })
 }
 
