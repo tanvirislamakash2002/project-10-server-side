@@ -1,8 +1,7 @@
-import { dbService } from "../../services/database.service.js"
 import { applicationServices } from "./application.service.js"
 
 
-const application = async (req, res) => {
+const submitApplication = async (req, res) => {
     try {
         const { _id } = req?.user;
         const applicant_id = _id.toString()
@@ -16,7 +15,7 @@ const application = async (req, res) => {
 
         const ifApplicationExist = await applicationServices.ifApplicationExist(applicant_id, listingId)
         if (!ifApplicationExist) {
-            const result = await applicationServices.application(data)
+            const result = await applicationServices.submitApplication(data)
             res.status(200).json({
                 success: true,
                 result
@@ -24,7 +23,7 @@ const application = async (req, res) => {
         }
         res.status(404).json({
             success: false,
-            message:"application is pending",
+            message: "application is pending",
             ifApplicationExist
         })
 
@@ -39,18 +38,63 @@ const application = async (req, res) => {
 
 const ifApplicationExist = async (req, res) => {
 
-    const { _id} = req?.user;
-    const applicantId = _id.toString()
-    const { listing_id } = req?.query;
-    const ifApplicationExist = await applicationServices.ifApplicationExist(applicantId, listing_id)
-    res.status(200).json({
-        success: true,
-        details: ifApplicationExist,
-        user: { applicantId, listing_id }
-    })
+    try {
+        const { _id } = req?.user;
+        const applicantId = _id.toString()
+
+        const { listing_id } = req?.query;
+
+        const ifApplicationExist = await applicationServices.ifApplicationExist(applicantId, listing_id)
+
+        if (ifApplicationExist) {
+            return res.status(200).json({
+                success: true,
+                details: ifApplicationExist
+            })
+        }
+        return res.status(200).json({
+            success: false,
+            message: 'no application exist'
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message,
+            details: err
+        })
+    }
+
+
+}
+const getMyApplications = async (req, res) => {
+
+    try {
+        const { _id } = req?.user;
+        const applicantId = _id.toString()
+
+        const getMyApplications = await applicationServices.getMyApplications(applicantId)
+
+        if (ifApplicationExist) {
+            return res.status(200).json({
+                success: true,
+                details: getMyApplications
+            })
+        }
+        return res.status(200).json({
+            success: false,
+            message: 'no'
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message,
+            details: err
+        })
+    }
+
+
 }
 
 export const applicationController = {
-    application,
-    ifApplicationExist
+    submitApplication,
+    ifApplicationExist,
+    getMyApplications
 }

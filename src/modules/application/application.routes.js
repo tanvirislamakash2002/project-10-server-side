@@ -4,7 +4,8 @@ import { authMiddleware } from '../../middleware/auth.js'
 
 const router = express.Router()
 
-router.post('/', authMiddleware.protect, applicationController.application)
+router.post('/', authMiddleware.protect, applicationController.submitApplication)
 router.get('/', authMiddleware.protect, applicationController.ifApplicationExist)
+router.get('/my-applications', authMiddleware.protect, applicationController.getMyApplications)
 
 export const applicationRoutes = router
