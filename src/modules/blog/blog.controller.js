@@ -223,7 +223,16 @@ const createBlogPost = async (req, res) => {
       author,
       readTime
     } = req.body;
-
+    console.log({
+      title,
+      excerpt,
+      content,
+      category,
+      tags,
+      coverImage,
+      author,
+      readTime
+    });
     const blogCollection = dbService.blogPosts;
 
 
