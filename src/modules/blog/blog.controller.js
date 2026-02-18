@@ -1,4 +1,5 @@
 import { dbService } from "../../services/database.service.js";
+import { blogServices } from "./blog.service.js";
 
 
 // Get all published blog posts with pagination and filtering
@@ -9,10 +10,9 @@ const getAllBlogPosts = async (req, res) => {
       limit = 10,
       category,
       search,
-      tag
+      tag,
+      sort = 'newest'
     } = req.query;
-
-    const blogCollection = dbService.blogPosts;
 
     // Build filter for published posts only
     const filter = { status: 'published' };
@@ -39,18 +39,13 @@ const getAllBlogPosts = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Get posts with pagination
-    const posts = await blogCollection
-      .find(filter)
-      .sort({ publishedAt: -1 }) // Newest first
-      .skip(skip)
-      .limit(parseInt(limit))
-      .toArray();
+    const posts = await blogServices.getAllBlogPosts(filter, skip, limit, sort)
 
     // Get total count for pagination
-    const totalPosts = await blogCollection.countDocuments(filter);
+    const totalPosts = await blogServices.getDocumentCount(filter)
     const totalPages = Math.ceil(totalPosts / parseInt(limit));
 
-    res.json({
+    res.status(200).json({
       success: true,
       posts,
       pagination: {

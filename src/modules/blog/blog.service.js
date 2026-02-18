@@ -1,18 +1,36 @@
 import { dbService } from "../../services/database.service.js";
 
-const getAllBlogPosts = async (email) => {
+const getAllBlogPosts = async (filter, skip, limit, sort = 'newest') => {
     const blogCollection = dbService.blogPosts
+
+    // Determine sort order based on sort parameter
+    let sortOption = {};
+    if (sort === 'newest') {
+        sortOption = { publishedAt: -1 };
+    } else if (sort === 'popular') {
+        sortOption = { 'stats.views': -1 };
+    } else if (sort === 'trending') {
+        sortOption = { 'stats.likes': -1 };
+    } else {
+        sortOption = { publishedAt: -1 }; 
+    }
+
     const result = await blogCollection
-      .find(filter)
-      .sort({ publishedAt: -1 }) 
-      .skip(skip)
-      .limit(parseInt(limit))
-      .toArray();
-      return result
+        .find(filter)
+        .sort(sortOption)
+        .skip(skip)
+        .limit(parseInt(limit))
+        .toArray();
+    return result
+}
+const getDocumentCount = async (filter) => {
+    const blogCollection = dbService.blogPosts
+    const result = await blogCollection.countDocuments(filter);
+    return result
 }
 
 
 export const blogServices = {
-    checkUserEmail,
-    loginUser
+    getAllBlogPosts,
+    getDocumentCount
 }
