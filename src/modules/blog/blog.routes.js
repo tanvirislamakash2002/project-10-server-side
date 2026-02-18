@@ -3,7 +3,7 @@ import { blogController } from './blog.controller.js';
 const router = express.Router();
 
 // Public routes
-router.get('/posts', blogController.getAllBlogPosts);
+router.get('/', blogController.getAllBlogPosts);
 router.get('/posts/:slug', blogController.getBlogPostBySlug);
 router.get('/posts/:slug/related', blogController.getRelatedPosts);
 router.get('/categories', blogController.getBlogCategories);
