@@ -71,8 +71,6 @@ const getBlogPostBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
 
-    const blogCollection = dbService.blogPosts;
-
     const post = blogServices.getBlogPostBySlug(slug);
 
     if (!post) {
@@ -102,11 +100,9 @@ const getRelatedPosts = async (req, res) => {
     const { slug } = req.params;
     const { limit = 3 } = req.query;
 
-    const blogCollection = dbService.blogPosts;
-
-
     // First get the current post to find related posts
-    const currentPost = await blogCollection.findOne({ slug });
+    // const currentPost = await blogCollection.findOne({ slug });
+    const currentPost = await blogServices.getBlogPostBySlug(slug);
 
     if (!currentPost) {
       return res.status(404).json({
