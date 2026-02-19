@@ -73,7 +73,6 @@ const getBlogPostBySlug = async (req, res) => {
 
     const blogCollection = dbService.blogPosts;
 
-
     const post = blogServices.getBlogPostBySlug(slug);
 
     if (!post) {
@@ -82,7 +81,6 @@ const getBlogPostBySlug = async (req, res) => {
         message: 'Blog post not found'
       });
     }
-
 
     res.json({
       success: true,
@@ -116,20 +114,9 @@ const getRelatedPosts = async (req, res) => {
         message: 'Blog post not found'
       });
     }
-
+    const { category, tags } = currentPost
     // Find related posts by category or tags
-    const relatedPosts = await blogCollection
-      .find({
-        slug: { $ne: slug }, // Exclude current post
-        status: 'published',
-        $or: [
-          { category: currentPost.category },
-          { tags: { $in: currentPost.tags } }
-        ]
-      })
-      .sort({ publishedAt: -1 })
-      .limit(parseInt(limit))
-      .toArray();
+    const relatedPosts = await blogServices.getRelatedPosts(slug, category, tags, limit)
 
     res.json({
       success: true,

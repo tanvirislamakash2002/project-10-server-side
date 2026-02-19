@@ -45,9 +45,28 @@ const getBlogPostBySlug = async (slug) => {
     return result
 }
 
+const getRelatedPosts = async (slug, category, tags, limit) => {
+    const blogCollection = dbService.blogPosts
+    const result = await blogCollection
+        .find({
+            slug: { $ne: slug },
+            status: 'published',
+            $or: [
+                { category: category },
+                { tags: { $in: tags } }
+            ]
+        })
+        .sort({ publishedAt: -1 })
+        .limit(parseInt(limit))
+        .toArray();
+
+    return result
+}
+
 
 export const blogServices = {
     getAllBlogPosts,
     getDocumentCount,
-    getBlogPostBySlug
+    getBlogPostBySlug,
+    getRelatedPosts
 }
