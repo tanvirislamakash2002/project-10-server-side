@@ -30,10 +30,18 @@ const getDocumentCount = async (filter) => {
 }
 
 const getBlogPostBySlug = async (slug) => {
+    const blogCollection = dbService.blogPosts
+
     const result = await blogCollection.findOne({
         slug,
         status: 'published'
     })
+
+    // Increment view count
+    await blogCollection.updateOne(
+        { slug },
+        { $inc: { views: 1 } }
+    );
     return result
 }
 

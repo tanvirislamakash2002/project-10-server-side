@@ -83,11 +83,6 @@ const getBlogPostBySlug = async (req, res) => {
       });
     }
 
-    // Increment view count
-    await blogCollection.updateOne(
-      { slug },
-      { $inc: { views: 1 } }
-    );
 
     res.json({
       success: true,
