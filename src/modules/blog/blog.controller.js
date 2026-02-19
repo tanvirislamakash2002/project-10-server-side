@@ -74,10 +74,7 @@ const getBlogPostBySlug = async (req, res) => {
     const blogCollection = dbService.blogPosts;
 
 
-    const post = await blogCollection.findOne({
-      slug,
-      status: 'published'
-    });
+    const post = blogServices.getBlogPostBySlug(slug);
 
     if (!post) {
       return res.status(404).json({

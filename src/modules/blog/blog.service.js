@@ -12,7 +12,7 @@ const getAllBlogPosts = async (filter, skip, limit, sort = 'newest') => {
     } else if (sort === 'trending') {
         sortOption = { 'stats.likes': -1 };
     } else {
-        sortOption = { publishedAt: -1 }; 
+        sortOption = { publishedAt: -1 };
     }
 
     const result = await blogCollection
@@ -29,8 +29,17 @@ const getDocumentCount = async (filter) => {
     return result
 }
 
+const getBlogPostBySlug = async (slug) => {
+    const result = await blogCollection.findOne({
+        slug,
+        status: 'published'
+    })
+    return result
+}
+
 
 export const blogServices = {
     getAllBlogPosts,
-    getDocumentCount
+    getDocumentCount,
+    getBlogPostBySlug
 }
